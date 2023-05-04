@@ -122,6 +122,11 @@ with federated credentials:
     * Select `Deploy Azure Function App` workflow.
     * Click on the `Run workflow` button
 
+* Ensure you created your OpenAI service
+for instance:
+![image](https://user-images.githubusercontent.com/48259636/236108851-2fbbea61-a46e-438b-8ed0-d242b8ad3f3d.png)
+
+
 * Configure following **Application Settings** for the Azure Function by going to your `function app > Configuration > Application Settings`:
   1. OPENAI_API_BASE - Azure OpenAI API Endpoint URL (e.g. https://openai-demo-ahmedbham.openai.azure.com/)
   2. OPENAI_API_KEY - Azure OpenAI API Key
