@@ -128,6 +128,8 @@ for instance:
 add text-davinci-003 in OpenAI Studio
 ![image](https://user-images.githubusercontent.com/48259636/236110858-a256d495-ffe9-46b7-811c-bef42ee01d3f.png)
 ![image](https://user-images.githubusercontent.com/48259636/236110975-7d627379-6a91-4630-a610-a491e267e32e.png)
+then deploy model:
+![image](https://user-images.githubusercontent.com/48259636/236111295-09b92646-c523-4763-81b8-b368beaa58fe.png)
 
 
 * Configure following **Application Settings** for the Azure Function by going to your `function app > Configuration > Application Settings`:
