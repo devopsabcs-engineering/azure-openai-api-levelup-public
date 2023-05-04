@@ -167,3 +167,7 @@ In our case:
 ```bash
 az group delete --name <resource-group-name> --yes
 ```
+
+We deleted these resources:
+![image](https://user-images.githubusercontent.com/48259636/236113631-04971cb6-5a81-4415-bee3-c8ad6d63536a.png)
+
