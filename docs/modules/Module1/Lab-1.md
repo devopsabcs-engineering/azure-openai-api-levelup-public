@@ -125,6 +125,9 @@ with federated credentials:
 * Ensure you created your OpenAI service
 for instance:
 ![image](https://user-images.githubusercontent.com/48259636/236108851-2fbbea61-a46e-438b-8ed0-d242b8ad3f3d.png)
+add text-davinci-003 in OpenAI Studio
+![image](https://user-images.githubusercontent.com/48259636/236110858-a256d495-ffe9-46b7-811c-bef42ee01d3f.png)
+![image](https://user-images.githubusercontent.com/48259636/236110975-7d627379-6a91-4630-a610-a491e267e32e.png)
 
 
 * Configure following **Application Settings** for the Azure Function by going to your `function app > Configuration > Application Settings`:
