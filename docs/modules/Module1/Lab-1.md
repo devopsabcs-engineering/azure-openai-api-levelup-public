@@ -131,8 +131,6 @@ add text-davinci-003 in OpenAI Studio
 then deploy model:
 ![image](https://user-images.githubusercontent.com/48259636/236111688-b408cce9-409b-4c9b-88b9-da8f8d9d6936.png)
 
-
-
 * Configure following **Application Settings** for the Azure Function by going to your `function app > Configuration > Application Settings`:
   1. OPENAI_API_BASE - Azure OpenAI API Endpoint URL (e.g. https://openai-demo-ahmedbham.openai.azure.com/)
   2. OPENAI_API_KEY - Azure OpenAI API Key
@@ -151,6 +149,9 @@ then deploy model:
   7. Click `Create` to create the subscription
 
 ![Event Grid Subscription Page](../../assets/images/module1/module1-create-event-subscription.png)
+
+In our case:
+![image](https://user-images.githubusercontent.com/48259636/236112590-77c51502-69d1-4314-b1fa-daa0b6b99b35.png)
 
 ## Testing Transaction Classification App
 
