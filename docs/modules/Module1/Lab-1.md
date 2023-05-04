@@ -83,6 +83,12 @@ chmod +x ./tools/deploy/module0/aad-federated-cred.sh
 
 * note down the **appId** echoed for use in next step
 
+app registration looks like:
+![image](https://user-images.githubusercontent.com/48259636/236104024-a4308244-821c-4ddc-8cca-d45da0eefbf6.png)
+with federated credentials:
+![image](https://user-images.githubusercontent.com/48259636/236104075-5b651d08-78a0-4e1c-b78a-63bb1a0990c3.png)
+
+
 ### Setting Github Actions secrets
 
 1. In your forked Github repository, click on the `Settings` tab.
