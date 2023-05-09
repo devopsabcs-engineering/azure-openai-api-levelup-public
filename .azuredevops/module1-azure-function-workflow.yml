@@ -1,0 +1,115 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  - none
+
+pool:
+  vmImage: windows-latest
+
+variables:
+  - group: AI_open_ai_api_vars
+  - name: AZURE_RESOURCE_GROUP
+    value: rg-azure-openai-test-002
+  - name: AZURE_FUNCTIONAPP_PACKAGE_PATH
+    value: "tools/deploy/module1/TransactionClassifier/" # set this to the path to your function app project, defaults to the repository root
+  - name: DOTNET_VERSION
+    value: "6.0.x"
+  - name: buildConfiguration
+    value: Release
+  - name: artefactName
+    value: fnApp
+  - name: azureSubscription
+    value: "AI_Landing_Zone"
+  - name: templateFile
+    value: "tools/deploy/module1/infra/modules/eventGridTopic.bicep"
+  - name: location
+    value: "eastus"
+
+stages:
+  - stage: build_stage
+    displayName: "Build"
+    jobs:
+      - job: build_job
+        steps:
+          - task: UseDotNet@2
+            displayName: "Install .NET Core SDK"
+            inputs:
+              version: "$(DOTNET_VERSION)"
+              performMultiLevelLookup: true
+              includePreviewVersions: true # Required for preview versions
+          - task: DotNetCoreCLI@2
+            displayName: "Dotnet Restore"
+            inputs:
+              command: "restore"
+              #feedsToUse: "select"
+              #feedRestore: "store/feedName"
+              projects: "$(AZURE_FUNCTIONAPP_PACKAGE_PATH)/*.csproj"
+              includeNuGetOrg: true
+          - task: DotNetCoreCLI@2
+            displayName: "Dotnet Build"
+            inputs:
+              command: "build"
+              projects: "$(AZURE_FUNCTIONAPP_PACKAGE_PATH)/*.csproj"
+              arguments: "--configuration $(buildConfiguration)"
+          # Publish projects to specified folder.
+          - task: DotNetCoreCLI@2
+            displayName: "Dotnet Publish"
+            inputs:
+              command: "publish"
+              publishWebProjects: false
+              projects: "$(AZURE_FUNCTIONAPP_PACKAGE_PATH)/*.csproj"
+              arguments: "-o $(Build.ArtifactStagingDirectory)"
+              zipAfterPublish: true
+              modifyOutputPath: true
+            # this code takes all the files in $(Build.ArtifactStagingDirectory) and uploads them as an artifact of your build.
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: "$(Build.ArtifactStagingDirectory)"
+              artifactName: "$(artefactName)"
+  - stage: publish_fn_app
+    displayName: "Publish to fn app"
+    dependsOn: build_stage
+    #condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or(eq(variables['Build.SourceBranch'], '${{ parameters.sourceBranchTrigger }}'), eq(variables['force_deploy'], 'true')))
+    jobs:
+      - job: publish_fn_app
+        steps:
+          - checkout: self
+          # download the artifact drop from the previous job
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              source: "current"
+              artifact: "$(artefactName)"
+              path: "$(Build.ArtifactStagingDirectory)"
+          - task: AzureCLI@2
+            name: printvardevfnapp
+            displayName: Get Function Name
+            inputs:
+              azureSubscription: "$(azureSubscription)"
+              scriptType: "pscore"
+              scriptLocation: "inlineScript"
+              inlineScript: |
+                Write-Host "looking for function app"
+                $appName = az functionapp list --resource-group ${{ variables.AZURE_RESOURCE_GROUP }} --query "[].name" -o tsv
+                Write-Host $appName
+                echo "##vso[task.setvariable variable=appName;isOutput=true]$appName"
+          - task: AzureFunctionApp@2
+            inputs:
+              azureSubscription: "$(azureSubscription)"
+              appType: "functionApp"
+              appName: $(printvardevfnapp.appName)
+              package: "$(Build.ArtifactStagingDirectory)/**/*.zip"
+              deploymentMethod: "auto"
+          - task: AzureResourceManagerTemplateDeployment@3
+            inputs:
+              deploymentScope: "Resource Group"
+              azureResourceManagerConnection: "$(azureSubscription)"
+              action: "Create Or Update Resource Group"
+              resourceGroupName: "$(AZURE_RESOURCE_GROUP)"
+              location: "$(location)"
+              templateLocation: "Linked artifact"
+              csmFile: "$(templateFile)"
+              #overrideParameters: "-openAiApiBaseEndpointUrl $(openAiApiBaseEndpointUrl) -openAiApiKey $(openAiApiKey)"
+              deploymentMode: "Incremental"

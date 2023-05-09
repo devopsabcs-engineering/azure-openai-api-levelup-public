@@ -1,0 +1,49 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  - none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  - group: AI_open_ai_azd_vars
+  - name: environment
+    value: dev
+  - name: location
+    value: eastus
+  - name: labFolder
+    value: lab2
+
+steps:
+  - script: |
+      echo Add other tasks to build, test, and deploy your project.
+      echo See https://aka.ms/yaml
+      curl -fsSL https://aka.ms/install-azd.sh | bash
+      azd version
+      azd auth login --client-id $(clientId) --client-secret $(clientSecret) --tenant-id $(tenantId)
+      azd auth login --check-status
+    displayName: "Install azd CLI"
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '16.x'
+    displayName: 'Install Node.js'
+  - script: |
+      echo more config
+      node --version
+      python --version
+      az login --service-principal -u $(clientId) -p $(clientSecret) --tenant $(tenantId)
+      azd auth login --client-id $(clientId) --client-secret $(clientSecret) --tenant-id $(tenantId)
+      azd auth login --check-status
+      azd config set defaults.subscription $(subscriptionId)
+      azd config set defaults.location $(location)
+      #mkdir $(labFolder)
+      cd $(labFolder)
+      azd init -t azure-search-openai-demo --environment $(environment) --location $(location) --no-prompt
+      azd env list
+      echo "Deploying with azd up!"
+      azd up --debug --no-prompt
+    displayName: "Init azd environment and deploy!"

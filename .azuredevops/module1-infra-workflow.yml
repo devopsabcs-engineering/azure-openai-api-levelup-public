@@ -1,0 +1,34 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  - none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  - group: AI_open_ai_api_vars
+  - name: AZURE_RESOURCE_GROUP
+    value: rg-azure-openai-test-002
+  - name: azureSubscription
+    value: "AI_Landing_Zone"
+  - name: location
+    value: "eastus"
+  - name: templateFile
+    value: "tools/deploy/module1/infra/module1-infra.bicep"
+
+steps:
+  - task: AzureResourceManagerTemplateDeployment@3
+    inputs:
+      deploymentScope: "Resource Group"
+      azureResourceManagerConnection: "$(azureSubscription)"
+      action: "Create Or Update Resource Group"
+      resourceGroupName: "$(AZURE_RESOURCE_GROUP)"
+      location: "$(location)"
+      templateLocation: "Linked artifact"
+      csmFile: "$(templateFile)"
+      overrideParameters: "-openAiApiBaseEndpointUrl $(openAiApiBaseEndpointUrl) -openAiApiKey $(openAiApiKey)"
+      deploymentMode: "Incremental"

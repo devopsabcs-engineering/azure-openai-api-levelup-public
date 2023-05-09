@@ -9,6 +9,10 @@ param functionAppName string = 'xact-classifier-openai-${uniqueString(resourceGr
 @description('The region to deploy the cluster. By default this will use the same region as the resource group.')
 param location string = resourceGroup().location
 
+param openAiApiBaseEndpointUrl string //= 'https://azure-openai-ektest-002.openai.azure.com/'
+@secure()
+param openAiApiKey string
+
 // Declare variables
 var storageAccountType = 'Standard_LRS'
 var appServicePlanSku = 'S1'
@@ -28,12 +32,11 @@ resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2022-09-01'
   parent: storageAccount
 }
 
-
 // Create storage containers
 resource classificationContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
   name: 'classification'
   parent: blobService
- 
+
   properties: {
     publicAccess: 'Blob'
   }
@@ -84,11 +87,11 @@ resource functionApp 'Microsoft.Web/sites@2022-03-01' = {
         }
         {
           name: 'OPENAI_API_BASE'
-          value: 'Enter your Azure OpenAI API Endpoint URL'
+          value: openAiApiBaseEndpointUrl // 'Enter your Azure OpenAI API Endpoint URL'
         }
         {
           name: 'OPENAI_API_KEY'
-          value: 'Enter your Azure OpenAI API Key'
+          value: openAiApiKey // 'Enter your Azure OpenAI API Key'
         }
         {
           name: 'OPENAI_API_MODEL'
@@ -106,7 +109,3 @@ resource functionApp 'Microsoft.Web/sites@2022-03-01' = {
     }
   }
 }
-
-
-
-
