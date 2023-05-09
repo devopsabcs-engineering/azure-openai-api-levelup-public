@@ -9,6 +9,8 @@ param environmentName string
 @description('Primary location for all resources')
 param location string
 
+param appServiceLocation string = 'eastus2'
+
 param appServicePlanName string = ''
 param backendServiceName string = ''
 param resourceGroupName string = ''
@@ -45,6 +47,8 @@ param chatGptModelName string = 'gpt-35-turbo'
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
 
+param userPrincipalTypeToUse string = 'ServicePrincipal'
+
 var abbrs = loadJsonContent('abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 var tags = { 'azd-env-name': environmentName }
@@ -78,7 +82,7 @@ module appServicePlan 'core/host/appserviceplan.bicep' = {
   scope: resourceGroup
   params: {
     name: !empty(appServicePlanName) ? appServicePlanName : '${abbrs.webServerFarms}${resourceToken}'
-    location: location
+    location: appServiceLocation
     tags: tags
     sku: {
       name: 'B1'
@@ -94,7 +98,7 @@ module backend 'core/host/appservice.bicep' = {
   scope: resourceGroup
   params: {
     name: !empty(backendServiceName) ? backendServiceName : '${abbrs.webSitesAppService}backend-${resourceToken}'
-    location: location
+    location: appServiceLocation
     tags: union(tags, { 'azd-service-name': 'backend' })
     appServicePlanId: appServicePlan.outputs.id
     runtimeName: 'python'
@@ -214,7 +218,7 @@ module openAiRoleUser 'core/security/role.bicep' = {
   params: {
     principalId: principalId
     roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
-    principalType: 'User'
+    principalType: userPrincipalTypeToUse
   }
 }
 
@@ -224,7 +228,7 @@ module formRecognizerRoleUser 'core/security/role.bicep' = {
   params: {
     principalId: principalId
     roleDefinitionId: 'a97b65f3-24c7-4388-baec-2e87135dc908'
-    principalType: 'User'
+    principalType: userPrincipalTypeToUse
   }
 }
 
@@ -234,7 +238,7 @@ module storageRoleUser 'core/security/role.bicep' = {
   params: {
     principalId: principalId
     roleDefinitionId: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
-    principalType: 'User'
+    principalType: userPrincipalTypeToUse
   }
 }
 
@@ -244,7 +248,7 @@ module storageContribRoleUser 'core/security/role.bicep' = {
   params: {
     principalId: principalId
     roleDefinitionId: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
-    principalType: 'User'
+    principalType: userPrincipalTypeToUse
   }
 }
 
@@ -254,7 +258,7 @@ module searchRoleUser 'core/security/role.bicep' = {
   params: {
     principalId: principalId
     roleDefinitionId: '1407120a-92aa-4202-b7e9-c0e197c71c8f'
-    principalType: 'User'
+    principalType: userPrincipalTypeToUse
   }
 }
 
@@ -264,7 +268,7 @@ module searchContribRoleUser 'core/security/role.bicep' = {
   params: {
     principalId: principalId
     roleDefinitionId: '8ebe5a00-799e-43f5-93ac-243d3dce84a7'
-    principalType: 'User'
+    principalType: userPrincipalTypeToUse
   }
 }
 

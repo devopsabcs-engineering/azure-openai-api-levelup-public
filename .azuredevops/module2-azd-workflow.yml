@@ -12,11 +12,13 @@ pool:
 variables:
   - group: AI_open_ai_azd_vars
   - name: environment
-    value: dev
+    value: dev-011
   - name: location
     value: eastus
   - name: labFolder
     value: lab2
+  - name: userPrincipalId
+    value: 55bd8ac9-9a66-4880-aca1-9c1bac62f6bd #emmanuel@devopsabcs.com
 
 steps:
   - script: |
@@ -29,21 +31,33 @@ steps:
     displayName: "Install azd CLI"
   - task: NodeTool@0
     inputs:
-      versionSpec: '16.x'
-    displayName: 'Install Node.js'
+      versionSpec: "16.x"
+    displayName: "Install Node.js"
   - script: |
       echo more config
       node --version
       python --version
       az login --service-principal -u $(clientId) -p $(clientSecret) --tenant $(tenantId)
+      #mkdir $(labFolder)
+      cd $(labFolder)
       azd auth login --client-id $(clientId) --client-secret $(clientSecret) --tenant-id $(tenantId)
       azd auth login --check-status
       azd config set defaults.subscription $(subscriptionId)
       azd config set defaults.location $(location)
-      #mkdir $(labFolder)
-      cd $(labFolder)
-      azd init -t azure-search-openai-demo --environment $(environment) --location $(location) --no-prompt
+      #azd init -t azure-search-openai-demo --environment $(environment) --location $(location) --no-prompt
+      azd init --environment $(environment) --location $(location) --no-prompt
+      echo "set user principal id"
+      azd env set AZURE_PRINCIPAL_ID $(userPrincipalId) --environment $(environment)
+      echo "list environments"
       azd env list
+      echo "list environment values"
+      azd env get-values --environment $(environment)
       echo "Deploying with azd up!"
-      azd up --debug --no-prompt
+      azd up --debug --no-prompt --environment $(environment)
+      echo "ls and cat"
+      ls .azure
+      cat .azure/$(environment)/.env
+      echo "re-try roles"
+      azd env refresh --environment $(environment)
+      pwsh ./scripts/roles.ps1
     displayName: "Init azd environment and deploy!"
